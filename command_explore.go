@@ -5,15 +5,15 @@ import (
 	"fmt"
 )
 
-func commandExplore(cfg *config, args []string) error {
-	if len(args) == 0 {
-		return errors.New("no location specified")
+func commandExplore(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("you must provide a location name")
 	}
 
 	locationName := args[0]
 	fmt.Println("Exploring " + locationName + "...")
 
-	locationData, err := cfg.pokeapiClient.Explore(locationName)
+	locationData, err := cfg.pokeapiClient.GetLocation(locationName)
 	if err != nil {
 		return err
 	}

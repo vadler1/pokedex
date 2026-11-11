@@ -23,10 +23,14 @@ func startRepl(cfg *config) {
 		}
 
 		command := words[0]
+		args := []string{}
+		if len(words) > 1 {
+			args = words[1:]
+		}
 
 		cmd, exists := cfg.commands[command]
 		if exists {
-			err := cmd.callback(cfg, words[1:])
+			err := cmd.callback(cfg, args...)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -52,7 +56,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config, []string) error
+	callback    func(*config, ...string) error
 }
 
 type commandRegistry map[string]cliCommand
