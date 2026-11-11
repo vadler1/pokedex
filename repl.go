@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/vadler1/pokedex/internal/pokeapi"
 )
 
 func startRepl(cfg *config) {
@@ -56,9 +58,10 @@ type cliCommand struct {
 type commandRegistry map[string]cliCommand
 
 type config struct {
-	commands commandRegistry
-	next     *string
-	prev     *string
+	commands         commandRegistry
+	pokeapiClient    pokeapi.Client
+	nextLocationsURL *string
+	prevLocationsURL *string
 }
 
 func getCommands() commandRegistry {
@@ -77,7 +80,7 @@ func getCommands() commandRegistry {
 		"map": {
 			name:        "map",
 			description: "Displays the map",
-			callback:    commandMap,
+			callback:    commandMapf,
 		},
 		"mapb": {
 			name:        "mapb",

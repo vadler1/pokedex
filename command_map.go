@@ -1,9 +1,8 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"net/http"
 )
 
 func ptr(s string) *string {
@@ -22,33 +21,36 @@ type locationResults struct {
 	Results  []locationEntry
 }
 
-func commandMap(cfg *config) error {
-
-	var url string
-	if cfg.next == nil {
-		url = "https://pokeapi.co/api/v2/location-area"
-	} else {
-		url = *cfg.next
-	}
-
-	res, err := http.Get(url)
+func commandMapf(cfg *config) error {
+	locationsResp, err := cfg.pokeapiClient.ListLocations(cfg.nextLocationsURL)
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
-	decoder := json.NewDecoder(res.Body)
-	var results locationResults
-	if err := decoder.Decode(&results); err != nil {
+	cfg.nextLocationsURL = locationsResp.Next
+	cfg.prevLocationsURL = locationsResp.Previous
+
+	for _, loc := range locationsResp.Results {
+		fmt.Println(loc.Name)
+	}
+	return nil
+}
+
+func commandMapb(cfg *config) error {
+	if cfg.prevLocationsURL == nil {
+		return errors.New("you're on the first page")
+	}
+
+	locationResp, err := cfg.pokeapiClient.ListLocations(cfg.prevLocationsURL)
+	if err != nil {
 		return err
 	}
 
-	cfg.next = results.Next
-	cfg.prev = results.Previous
+	cfg.nextLocationsURL = locationResp.Next
+	cfg.prevLocationsURL = locationResp.Previous
 
-	for _, entry := range results.Results {
-		fmt.Println(entry.Name)
+	for _, loc := range locationResp.Results {
+		fmt.Println(loc.Name)
 	}
-
 	return nil
 }
