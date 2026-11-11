@@ -13,43 +13,37 @@ type CacheEntry struct {
 type CacheData map[string]CacheEntry
 
 type Cache struct {
-	data         CacheData
-	mu           *sync.RWMutex
-	ticker       *time.Ticker
-	reapInterval time.Duration
+	data CacheData
+	mu   *sync.RWMutex
 }
 
 func NewCache(interval time.Duration) *Cache {
-	ticker := time.NewTicker(interval)
-
 	cache := &Cache{
-		data:         make(CacheData),
-		mu:           &sync.RWMutex{},
-		ticker:       ticker,
-		reapInterval: interval,
+		data: make(CacheData),
+		mu:   &sync.RWMutex{},
 	}
 
-	go func() {
-		cache.reapLoop()
-	}()
+	go cache.reapLoop(interval)
 
 	return cache
 }
 
-func (c *Cache) reapLoop() {
-	for range c.ticker.C {
-		c.mu.Lock()
-		for k, v := range c.data {
-			if time.Since(v.createdAt) > c.reapInterval {
-				delete(c.data, k)
-			}
-		}
-		c.mu.Unlock()
+func (c *Cache) reapLoop(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+
+	for range ticker.C {
+		c.reap(time.Now().UTC(), interval)
 	}
 }
 
-func (c *Cache) Cleanup() {
-	c.ticker.Stop()
+func (c *Cache) reap(now time.Time, last time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for k, v := range c.data {
+		if v.createdAt.Before(now.Add(-last)) {
+			delete(c.data, k)
+		}
+	}
 }
 
 func (c *Cache) Add(key string, value []byte) {
