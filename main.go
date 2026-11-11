@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/vadler1/pokedex/internal/pokeapi"
+	"github.com/vadler1/pokedex/internal/pokecache"
 )
 
 func main() {
@@ -12,6 +13,7 @@ func main() {
 	cfg := &config{
 		commands:      getCommands(),
 		pokeapiClient: pokeClient,
+		cache:         pokecache.NewCache(5 * time.Minute),
 	}
 
 	startRepl(cfg)

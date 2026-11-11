@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/vadler1/pokedex/internal/pokeapi"
+	"github.com/vadler1/pokedex/internal/pokecache"
 )
 
 func startRepl(cfg *config) {
@@ -62,6 +63,7 @@ type config struct {
 	pokeapiClient    pokeapi.Client
 	nextLocationsURL *string
 	prevLocationsURL *string
+	cache            *pokecache.Cache
 }
 
 func getCommands() commandRegistry {
