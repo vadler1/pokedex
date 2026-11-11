@@ -57,6 +57,8 @@ type commandRegistry map[string]cliCommand
 
 type config struct {
 	commands commandRegistry
+	next     *string
+	prev     *string
 }
 
 func getCommands() commandRegistry {
@@ -71,6 +73,16 @@ func getCommands() commandRegistry {
 			name:        "help",
 			description: "Displays a help message",
 			callback:    commandHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "Displays the map",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous map page",
+			callback:    commandMapb,
 		},
 	}
 }
