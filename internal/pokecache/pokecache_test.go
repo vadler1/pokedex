@@ -2,11 +2,16 @@ package pokecache
 
 import (
 	"testing"
+	"time"
+)
+
+const (
+	reapInterval = time.Second
 )
 
 func TestCacheEmpty(t *testing.T) {
 
-	cache := NewCache()
+	cache := NewCache(reapInterval)
 
 	// test getting a value from empty cache
 	value, ok := cache.Get("nonexistent")
@@ -19,7 +24,7 @@ func TestCacheEmpty(t *testing.T) {
 }
 
 func TestCacheAddAndGet(t *testing.T) {
-	cache := NewCache()
+	cache := NewCache(reapInterval)
 	key := "key"
 	value := []byte("value")
 	cache.Add(key, value)
@@ -33,8 +38,8 @@ func TestCacheAddAndGet(t *testing.T) {
 	}
 }
 
-func TestCachOverwrittenValue(t *testing.T) {
-	cache := NewCache()
+func TestCacheOverwrittenValue(t *testing.T) {
+	cache := NewCache(reapInterval)
 	key := "key"
 	value1 := []byte("value1")
 	value2 := []byte("value2")
@@ -58,5 +63,33 @@ func TestCachOverwrittenValue(t *testing.T) {
 	}
 	if string(got) != string(value2) {
 		t.Errorf("Expected %v for key %s, got %v", value2, key, got)
+	}
+}
+
+func TestCacheReaping(t *testing.T) {
+	cache := NewCache(reapInterval)
+	key := "key"
+	value := []byte("value")
+	cache.Add(key, value)
+
+	var got []byte
+	var ok bool
+
+	got, ok = cache.Get(key)
+	if !ok {
+		t.Errorf("Expected true for existing key, got false")
+	}
+	if string(got) != string(value) {
+		t.Errorf("Expected %v for key %s, got %v", value, key, got)
+	}
+
+	time.Sleep(reapInterval + 1*time.Second)
+
+	got, ok = cache.Get(key)
+	if ok {
+		t.Errorf("Expected false for reaped key, got true")
+	}
+	if got != nil {
+		t.Errorf("Expected nil for reaped key, got %v", got)
 	}
 }
