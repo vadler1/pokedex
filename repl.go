@@ -102,5 +102,10 @@ func getCommands() commandRegistry {
 			description: "Attempt to catch a Pokemon",
 			callback:    commandCatch,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "Inspect a caught Pokemon",
+			callback:    commandInspect,
+		},
 	}
 }
