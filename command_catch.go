@@ -40,15 +40,15 @@ func commandCatch(cfg *config, args ...string) error {
 		return err
 	}
 
-	baseExperience := pokemonData.BaseExperience
+	probability := rand.Intn(pokemonData.BaseExperience)
 
-	probability := catchProbability(baseExperience)
-	if rand.Float64() < probability {
-		fmt.Println(pokemonName + " was caught!")
-		cfg.caughtPokemon[pokemonName] = pokemonData
-	} else {
+	if probability > 40 {
 		fmt.Println(pokemonName + " escaped!")
+		return nil
 	}
+
+	fmt.Println(pokemonName + " was caught!")
+	cfg.caughtPokemon[pokemonName] = pokemonData
 
 	return nil
 }
